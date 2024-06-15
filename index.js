@@ -1,14 +1,14 @@
 import kNear from './kNear.js';
 
+// Data from the index.html
 let video = document.getElementById('video');
-let canvasElement = document.getElementById('canvasElement');
 let canvasCtx = canvasElement.getContext('2d');
-let targetGesture = document.getElementById('targetGesture');
-let predictedGesture = document.getElementById('predictedGesture');
-let scoreDisplay = document.getElementById('score');
-let roundDisplay = document.getElementById('round');
-let timerDisplay = document.getElementById('timer');
+let scoreText = document.getElementById('score');
+let roundText = document.getElementById('round');
+let timerText = document.getElementById('timer');
 
+
+//  Setup
 let k = 3;
 let kNearClassifier = new kNear(k);
 
@@ -16,34 +16,37 @@ let score = 0;
 let round = 1;
 let isRecording = false;
 let timer = null;
-let baseTime = 10; 
+let time = 10; 
 let currentTargetGesture = null;
 let recordedData = [];
 
+// All the signs for the game
 const signs = ['duim omhoog', 'duim omlaag', 'hand', 'oke', 'middlefinger', 'peace', 'vuist'];
 
-async function loadGestureData() {
+
+// Laden van de sings uit de signs.json
+async function loadSign() {
     try {
-        const response = await fetch('emote.json');
+        const response = await fetch('signs.json');
         const data = await response.json();
 
         data.forEach(item => {
             if (item.landmarks.length === 63) {
                 kNearClassifier.learn(item.landmarks, item.gesture);
-                console.log(`Learned gesture: ${item.gesture}`);
+                console.log(`sign: ${item.gesture} geladen`);
             } else {
-                console.error(`Invalid landmark length for gesture ${item.gesture}. Expected 63, got ${item.landmarks.length}`);
+                console.error(`geen goede lengte voor: ${item.gesture}. verwacht er 63 maar geeft ${item.landmarks.length}`);
             }
         });
 
     } catch (error) {
-        console.error('Error loading or parsing emote.json:', error);
+        console.error(error);
     }
 }
 
 async function main() {
     // await setupCamera(); 
-    await loadGestureData();
+    await loadSign();
 
     // video.play();
     startVideoProcessing();
@@ -109,22 +112,22 @@ function startGame() {
 
 function nextRound() {
     currentTargetGesture = signs[Math.floor(Math.random() * signs.length)];
-    targetGesture.textContent = `Target Gesture: ${currentTargetGesture}`;
-    scoreDisplay.textContent = `Score: ${score}`;
+    targetGesture.textContent = `Maak gebaar: ${currentTargetGesture}`;
+    scoreText.textContent = `Score: ${score}`;
     
-    let timeLeft = baseTime - Math.floor((round - 1) / 10); // Decrease time every 10 rounds
+    let timeLeft = time - Math.floor((round - 1) / 10); // Decrease time every 10 rounds
     timeLeft = Math.max(timeLeft, 3); // Ensure at least 3 seconds
 
-    roundDisplay.textContent = `Round: ${round}`;
-    timerDisplay.textContent = `Time left: ${timeLeft}s`;
+    roundText.textContent = `Ronde: ${round}`;
+    timerText.textContent = `Tijd: ${timeLeft}s`;
 
     timer = setInterval(() => {
         timeLeft--;
-        timerDisplay.textContent = `Time left: ${timeLeft}s`;
+        timerText.textContent = `Tijd over: ${timeLeft}s`;
 
         if (timeLeft <= 0) {
             clearInterval(timer);
-            alert(`Time's up! Your final score is ${score}`);
+            alert(`Tijd is op!, scorde: ${score}`);
             startGame();
         }
     }, 1000);
