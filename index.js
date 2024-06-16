@@ -32,10 +32,10 @@ async function loadSign() {
 
         data.forEach(item => {
             if (item.landmarks.length === 63) {
-                kNearClassifier.learn(item.landmarks, item.gesture);
-                console.log(`sign: ${item.gesture} geladen`);
+                kNearClassifier.learn(item.landmarks, item.name);
+                console.log(`sign: ${item.name} geladen`);
             } else {
-                console.error(`geen goede lengte voor: ${item.gesture}. verwacht er 63 maar geeft ${item.landmarks.length}`);
+                console.error(`geen goede lengte voor: ${item.name}. verwacht er 63 maar geeft ${item.landmarks.length}`);
             }
         });
 
@@ -88,10 +88,10 @@ function onResults(results) {
 
             let flatLandmarks = landmarks.flatMap(lm => [lm.x, lm.y, lm.z]);
 
-            let gesture = kNearClassifier.classify(flatLandmarks);
-            predictedGesture.textContent = `Predicted Gesture: ${gesture}`;
+            let name = kNearClassifier.classify(flatLandmarks);
+            predictedGesture.textContent = `Predicted Gesture: ${name}`;
 
-            if (gesture === currentTargetGesture) {
+            if (name === currentTargetGesture) {
                 score += 10; // Increment score
                 clearInterval(timer); // Stop timer
                 nextRound(); // Start next round
